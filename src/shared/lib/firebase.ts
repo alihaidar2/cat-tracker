@@ -1,7 +1,11 @@
 // src/shared/lib/firebase.ts
-import Constants from "expo-constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import {
+  getAuth,
+  getReactNativePersistence,
+  initializeAuth,
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -26,6 +30,16 @@ const firebaseConfig = {
 // Only initialize once
 const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
+// With persistence so you stay logged in even if you close it
+export const auth = (() => {
+  try {
+    return initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  } catch {
+    return getAuth(app);
+  }
+})();
+
 export const db = getFirestore(app);
 export const storage = getStorage(app);

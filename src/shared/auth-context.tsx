@@ -13,36 +13,41 @@ type AuthCtx = {
   user: User | null;
   loading: boolean;
   authed: boolean;
+  /** clears Firebase session and AsyncStorage (if enabled) */
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthCtx>({
   user: null,
   loading: true,
   authed: false,
+  logout: async () => {},
 });
 
 export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoad] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
       if (u?.isAnonymous) {
         await signOut(auth);
         setUser(null);
       } else {
-        setUser(u);
+        setUser(u ?? null);
       }
-      setLoading(false);
+      setLoad(false);
     });
-
-    return unsubscribe;
+    return unsub;
   }, []);
+
+  /** wrapper so screens don’t import firebase/auth directly */
+  const logout = () => signOut(auth);
 
   const authed = !!user && !user.isAnonymous;
 
   return (
-    <AuthContext.Provider value={{ user, loading, authed }}>
+    <AuthContext.Provider value={{ user, loading: loading, authed, logout }}>
       {children}
     </AuthContext.Provider>
   );
