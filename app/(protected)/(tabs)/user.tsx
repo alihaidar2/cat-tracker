@@ -6,8 +6,13 @@ export default function UserScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
 
+  console.log("user", user);
+
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Text style={{ fontSize: 30, fontWeight: "bold", marginBottom: 12 }}>
+        {user?.displayName ?? "Anonymous"}
+      </Text>
       <Text style={{ fontSize: 18, marginBottom: 12 }}>
         {user?.email ?? "Anonymous"}
       </Text>
